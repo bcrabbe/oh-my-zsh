@@ -51,7 +51,7 @@ gref() {
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh"
 
-
+alias gloga="glog --all"
 
 fb() {
     cd /Users/bcrabbe/p/fb-messenger-cli
