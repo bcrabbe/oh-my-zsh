@@ -12,9 +12,10 @@ alias dsls="docker service ls"
 alias dsps="docker service ps"
 alias dss="docker service scale"
 
+export EDITOR=vi
 
 sshec2 () {
-    ssh -A ec2-user@$1
+    ssh -i ~/.ssh/devenv-key.pem ec2-user@$1
 }
 
 consume-local () {
@@ -50,7 +51,9 @@ gref() {
 }
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh"
-
+docker-stop() {
+    docker rm -f $(docker ps -aq)
+}
 alias gloga="glog --all"
 
 fb() {
