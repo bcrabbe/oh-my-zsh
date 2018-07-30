@@ -33,6 +33,9 @@ produce() {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh --broker-list $1:9092 --topic $2
 }
 
+consumer-group() {
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-consumer-groups.sh --bootstrap-server $1:9092 --group $3
+}
 
 create-local() {
     /Users/bcrabbe/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh --create --topic $1 --zookeeper $(ipconfig getifaddr en0):2181 --partitions 1 --replication-factor 1
