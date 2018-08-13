@@ -11,7 +11,8 @@
 alias dsls="docker service ls"
 alias dsps="docker service ps"
 alias dss="docker service scale"
-bindkey -e
+#bindkey -e
+
 export EDITOR=vi
 
 sshec2 () {
@@ -58,7 +59,6 @@ alias kafka-up="exec ~/Software/localKafka/brokers.sh"
 docker-stop() {
     docker rm -f $(docker ps -aq)
 }
-
 alias gloga="glog --all"
 
 fb() {
