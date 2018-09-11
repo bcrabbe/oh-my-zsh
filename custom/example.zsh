@@ -16,7 +16,7 @@ alias dss="docker service scale"
 export EDITOR=vi
 
 sshec2 () {
-    ssh -i ~/.ssh/devenv-key.pem ec2-user@$1
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/devenv-key.pem ec2-user@$1
 }
 
 consume-local () {
@@ -87,6 +87,6 @@ export NVM_DIR="$HOME/.nvm"
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-
+alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
 # fresh set up ?
 # add emacs style editing to iterm2 : https://apple.stackexchange.com/questions/154292/iterm-going-one-word-backwards-and-forwards?newreg=f43b9d3acf884899a01bb28b566b9b27
