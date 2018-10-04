@@ -12,7 +12,8 @@ alias dsls="docker service ls"
 alias dsps="docker service ps"
 alias dss="docker service scale"
 #bindkey -e
-
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib"
+export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
 
 sshec2 () {
@@ -68,7 +69,7 @@ fb() {
 
 #https://medium.com/@Clovis_app/configuration-of-a-beautiful-efficient-terminal-and-prompt-on-osx-in-7-minutes-827c29391961
 ZSH_THEME="powerlevel9k/powerlevel9k"
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir rbenv vcs)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir ssh vcs)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator background_jobs history time)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 
