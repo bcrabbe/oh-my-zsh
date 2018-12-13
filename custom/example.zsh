@@ -17,8 +17,12 @@ export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
 export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/21.1.1/lib/erlang/man/"
 
-sshec2 () {
+ssho () {
     ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/devenv-key.pem ec2-user@$1 $2 $3 $4 $5 $6
+}
+
+sshb () {
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/betler-key.pem ec2-user@$1 $2 $3 $4 $5 $6
 }
 
 consume-local () {
@@ -32,6 +36,7 @@ consume () {
 produce-local() {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh --broker-list $(ipconfig getifaddr en0):9092 --topic $1
 }
+
 produce() {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh --broker-list $1:9092 --topic $2
 }
@@ -58,9 +63,25 @@ gref() {
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
 
+
 docker-stop() {
     docker rm -f $(docker ps -aq)
 }
+
+docker-rmi() {
+    docker rmi -f $(docker images -aq)
+}
+
+docker-rmvol() {
+    docker volume prune -f
+}
+
+docker-clean() {
+    docker-stop 
+    docker-rmi &
+    docker-rmvol
+}
+
 alias gloga="glog --all"
 
 fb() {
@@ -98,7 +119,64 @@ alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
 # fresh set up ?
 # add emacs style editing to iterm2 : https://apple.stackexchange.com/questions/154292/iterm-going-one-word-backwards-and-forwards?newreg=f43b9d3acf884899a01bb28b566b9b27
 
+if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+fi
+# alias python=/usr/local/bin/python3.6
+# alias pip=pip3.6
 
-alias python=/usr/local/bin/python3.6
-alias pip=pip3.6
+source <(kubectl completion zsh)
+source <(minikube completion zsh)
+alias k="kubectl"
 
+erl-gitignore() {
+    echo '*~
+*.plt
+erl_crash.dump
+deps
+.eunit
+.DS_Store
+.erlang.mk.*
+ebin
+_rel
+relx
+logs
+.erlang.mk
+db
+xrefr
+*.d
+elvis
+elvis.config
+.fuse_hidden*
+*.log
+\#*\#
+.\#*
+*.swp
+*.swo
+'
+}
+
+clone-app() {
+    FROM=$1
+    TO=$2
+    cp -rf ~/code/${FROM} ~/code/${TO}
+    cd ~/code/${TO}
+    sed -i "" "s/${FROM}/${TO}/g" Makefile
+    sed -i "" "s/${FROM}/${TO}/g" dev.config
+    sed -i "" "s/${FROM}/${TO}/g" README.md
+    sed -i "" "s/${FROM}/${TO}/g" relx.config
+    find ./src -type f -exec sed -i "" "s/${FROM}/${TO}/g" '{}' ';'
+    find ./rel -type f -exec sed -i "" "s/${FROM}/${TO}/g" '{}' ';'
+    autoload -U zmv
+    zmv -W "./src/${FROM}*" "./src/${TO}*"
+    zmv -W "*${FROM}*" "*${TO}*"
+    rm -rf .git
+    make
+    git init
+    git flow init -fd
+    erl-gitignore > .gitignore
+    git add *
+    git add .gitignore .gitlab-ci.yml
+    git commit -m "initial"
+    etags src/*.erl
+}
