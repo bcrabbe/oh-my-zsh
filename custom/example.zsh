@@ -15,81 +15,135 @@ alias dss="docker service scale"
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib"
 export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
-export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/21.1.1/lib/erlang/man/"
+export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/21.2.4/lib/erlang/man/"
 
 ssho () {
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/devenv-key.pem ec2-user@$1 $2 $3 $4 $5 $6
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/devenv-key.pem ec2-user@$1
 }
 
 sshb () {
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/betler-key.pem ec2-user@$1 $2 $3 $4 $5 $6
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/betler-key.pem ec2-user@$1
 }
 
 consume-local () {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh --bootstrap-server $(ipconfig getifaddr en0):9092 --topic  $@
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
+        --bootstrap-server \
+        $(ipconfig getifaddr en0):9092 \
+        --topic $@
 }
 
 consume () {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh --bootstrap-server $1:9092 --topic $2 $3 $4 $5
+    HOST=$1
+    TOPIC=$2
+    shift
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
+        --bootstrap-server $HOST:9092 \
+        --topic $TOPIC $@
 }
 
 produce-local() {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh --broker-list $(ipconfig getifaddr en0):9092 --topic $1
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh \
+        --broker-list \
+        $(ipconfig getifaddr en0):9092 \
+        --topic $@
 }
 
 produce() {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh --broker-list $1:9092 --topic $2
+    HOST=$1
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-console-producer.sh \
+        --broker-list \
+        $HOST:9092 \
+        --topic $@
 }
 
 consumer-group() {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-consumer-groups.sh --bootstrap-server $1:9092 --group $3
+    HOST=$1
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-consumer-groups.sh \
+        --bootstrap-server \
+        $HOST:9092 \
+        --group $@
 }
 
 create-local() {
-    /Users/bcrabbe/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh --create --topic $1 --zookeeper $(ipconfig getifaddr en0):2181 --partitions 1 --replication-factor 1
+    TOPIC=$1
+    shift
+    /Users/bcrabbe/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh \
+        --create \
+        --topic $1 \
+        --zookeeper $(ipconfig getifaddr en0):2181 \
+        --partitions 1 \
+        --replication-factor 1 \
+        $@
 }
 
 list-local() {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh --list --zookeeper localhost:2181
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh \
+        --list \
+        --zookeeper $(ipconfig getifaddr en0):2181 \
+        $@
 }
 
 list-topics() {
-    ~/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh --list --zookeeper $1:2181
+    ZK=$1
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-topics.sh \
+        --list \
+        --zookeeper $ZK:2181 \
+        $@
+}
+
+describe-grp() {
+    KAF=$1
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-consumer-groups.sh \
+        --bootstrap-server $KAF:9092 \
+        --describe \
+        --group $@
+}
+
+consumer-grp() {
+    KAF=$1
+    shift
+    ~/Software/kafka_2.11-1.1.0/bin/kafka-consumer-groups.sh \
+        --bootstrap-server $KAF:9092 \
+        $@
 }
 
 gref() {
-    grep -nri -e $1 *
+    grep --color -nri -e $1 *
 }
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
 
-
 docker-stop() {
+    echo "docker rm -f $(docker ps -aq)"
     docker rm -f $(docker ps -aq)
 }
 
 docker-rmi() {
+    echo "docker rmi -f $(docker images -aq)"
     docker rmi -f $(docker images -aq)
 }
 
 docker-rmvol() {
+    echo "docker volume prune -f"
     docker volume prune -f
 }
 
 docker-clean() {
-    docker-stop 
+    docker-stop
     docker-rmi &
     docker-rmvol
 }
 
 alias gloga="glog --all"
 
-fb() {
-    cd /Users/bcrabbe/p/fb-messenger-cli
-    node cli
-}
-
 git-delete-tag() {
+    echo "git tag -d $1
+    git push origin :refs/tags/$1"
     git tag -d $1
     git push origin :refs/tags/$1
 }
