@@ -15,15 +15,9 @@ alias dss="docker service scale"
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib"
 export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
-export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/21.2.4/lib/erlang/man/"
-
-ssho () {
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/devenv-key.pem ec2-user@$1
-}
-
-sshb () {
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/betler-key.pem ec2-user@$1
-}
+export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/22.0.1/lib/erlang/man/"
+#set zsh editing commands to emacs - see man zle
+bindkey -e
 
 consume-local () {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
@@ -113,7 +107,7 @@ consumer-grp() {
 }
 
 gref() {
-    grep --color -nri -e $1 *
+    grep --color -nri --exclude-dir=node_modules -e $1 *
 }
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
@@ -138,6 +132,21 @@ docker-clean() {
     docker-rmi &
     docker-rmvol
 }
+
+docker-attach() {
+    local CONTAINER_ID=`docker ps | grep "$1" | awk '{print $1}'`
+
+    if [ -z "${CONTAINER_ID}" ]; then
+        echo "ERROR: Could not find container."
+    elif [ `echo "${CONTAINER_ID}" | wc -l` -gt 1 ]; then
+        echo "ERROR: Found multiple containers."
+        docker ps | grep "$1\|CONTAINER ID"
+    else
+        echo "Found container: ${CONTAINER_ID}"
+        docker exec -it ${CONTAINER_ID} /bin/bash
+    fi
+}
+
 
 alias gloga="glog --all"
 
@@ -180,7 +189,7 @@ fi
 # alias pip=pip3.6
 
 source <(kubectl completion zsh)
-source <(minikube completion zsh)
+# source <(minikube completion zsh)
 alias k="kubectl"
 
 erl-gitignore() {
