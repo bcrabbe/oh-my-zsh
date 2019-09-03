@@ -18,6 +18,8 @@ export EDITOR=vi
 export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/22.0.1/lib/erlang/man/"
 #set zsh editing commands to emacs - see man zle
 bindkey -e
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
+
 
 consume-local () {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
@@ -192,6 +194,11 @@ source <(kubectl completion zsh)
 # source <(minikube completion zsh)
 alias k="kubectl"
 
+function get-kube-conf() {
+  mkdir -p ~/.kube
+  curl -s ${1?no host address given}:8583/get_kube_conf > ~/.kube/config
+}
+
 erl-gitignore() {
     echo '*~
 *.plt
@@ -242,4 +249,37 @@ clone-app() {
     git add .gitignore .gitlab-ci.yml
     git commit -m "initial"
     etags src/*.erl
+}
+
+function vistRepo() {
+    cd ~/code/$1
+
+    echo $1 PRs:
+    hub pr list -f "%pC%>(8)%i%Creset  %t%  l%n   %U%n%n"
+    printf '\n'
+}
+
+function lspr() {
+    rd=$PWD
+
+    vistRepo intl_fe-core
+    vistRepo intl_fe-uk
+    vistRepo intl_web-core
+    vistRepo intl_web-uk-stub
+
+    cd $rd
+}
+
+auth-token () {
+    # Usage:
+    # ck-auth-token test@example.com [optional password]
+
+    email=$1
+    password=${2:-Testing1!}
+
+    if [ -z "$NODE_IP" ]; then
+        echo "NODE_IP env var not set. Exiting..."
+    fi
+
+    curl -H "Content-Type: application/json" -H "host: intl-backend-uk.service" -d "{\"emailAddress\":\"$email\",\"password\":\"$password\"}" $NODE_IP:4140/api/v1/login | jq ".authToken"
 }
