@@ -16,10 +16,10 @@ export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib"
 export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
 export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/22.0.1/lib/erlang/man/"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 #set zsh editing commands to emacs - see man zle
 bindkey -e
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
-
 
 consume-local () {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
@@ -113,6 +113,22 @@ gref() {
 }
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
+#generates a rudimentary tags file for scala programs with
+# ~/.ctags:
+# --langdef=Scala
+# --langmap=Scala:.scala
+# --regex-Scala=/^[^\*\/]*class[ \\t]*([a-zA-Z0-9_]+)/\1/c,classes/
+# --regex-Scala=/^[^\*\/]*object[ \\t]*([a-zA-Z0-9_]+)/\1/o,objects/
+# --regex-scala=/^[^\*\/]*trait[ \\t]*([a-zA-Z0-9_]+)/\1/t,traits/
+# --regex-Scala=/^[^\*\/]*case[ \\t]*class[ \\t]*([a-zA-Z0-9_]+)/\1/m,case-classes/
+# --regex-Scala=/^[^\*\/]*abstract[ \\t]*class[ \\t]*([a-zA-Z0-9_]+)/\1/a,abstract-classes/
+# --regex-Scala=/^[^\*\/]*def[ \\t]*([a-zA-Z0-9_]+)[ \\t]*.*[:=]/\1/f,functions/
+# --regex-Scala=/^[^\*\/]*val[ \\t]*([a-zA-Z0-9_]+)[ \\t]*[:=]/\1/V,values/
+# --regex-Scala=/^[^\*\/]*var[ \\t]*([a-zA-Z0-9_]+)[ \\t]*[:=]/\1/v,variables/
+# --regex-Scala=/^[^\*\/]*type[ \\t]*([a-zA-Z0-9_]+)[ \\t]*[\[<>=]/\1/T,types/
+# --exclude='*/target/*'
+
+alias sctags="/usr/local/Cellar/ctags/5.8_1/bin/ctags -R -e"
 
 docker-stop() {
     echo "docker rm -f $(docker ps -aq)"
@@ -148,7 +164,6 @@ docker-attach() {
         docker exec -it ${CONTAINER_ID} /bin/bash
     fi
 }
-
 
 alias gloga="glog --all"
 
@@ -189,16 +204,6 @@ if command -v pyenv 1>/dev/null 2>&1; then
 fi
 # alias python=/usr/local/bin/python3.6
 # alias pip=pip3.6
-
-source <(kubectl completion zsh)
-# source <(minikube completion zsh)
-alias k="kubectl"
-
-function get-kube-conf() {
-  mkdir -p ~/.kube
-  curl -s ${1?no host address given}:8583/get_kube_conf > ~/.kube/config
-}
-
 erl-gitignore() {
     echo '*~
 *.plt
@@ -251,35 +256,18 @@ clone-app() {
     etags src/*.erl
 }
 
-function vistRepo() {
-    cd ~/code/$1
+source <(kubectl completion zsh)
+# source <(minikube completion zsh)
+alias k="kubectl -n ck-service"
+alias kgp="kubectl -n ck-service get pods"
+alias kdp="kubectl -n ck-service describe pods"
 
-    echo $1 PRs:
-    hub pr list -f "%pC%>(8)%i%Creset  %t%  l%n   %U%n%n"
-    printf '\n'
+function kl(){
+    kubectl -n ck-service logs -f $1 ck-service
 }
 
-function lspr() {
-    rd=$PWD
-
-    vistRepo intl_fe-core
-    vistRepo intl_fe-uk
-    vistRepo intl_web-core
-    vistRepo intl_web-uk-stub
-
-    cd $rd
+function katt(){
+    kubectl exec -it --namespace ck-service $1 -c ck-service bash
 }
 
-auth-token () {
-    # Usage:
-    # ck-auth-token test@example.com [optional password]
-
-    email=$1
-    password=${2:-Testing1!}
-
-    if [ -z "$NODE_IP" ]; then
-        echo "NODE_IP env var not set. Exiting..."
-    fi
-
-    curl -H "Content-Type: application/json" -H "host: intl-backend-uk.service" -d "{\"emailAddress\":\"$email\",\"password\":\"$password\"}" $NODE_IP:4140/api/v1/login | jq ".authToken"
-}
+export NODE_IP=$(cat ~/.kube/config | grep server | cut -d / -f 3 | cut -d : -f 1)
