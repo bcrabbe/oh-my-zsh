@@ -113,7 +113,10 @@ gref() {
 }
 
 alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
-#generates a rudimentary tags file for scala programs with
+
+#generates a rudimentary tags file for scala programs
+alias sctags="/usr/local/Cellar/ctags/5.8_1/bin/ctags -R -e"
+# requires:
 # ~/.ctags:
 # --langdef=Scala
 # --langmap=Scala:.scala
@@ -127,8 +130,6 @@ alias kafka-up="exec ~/Software/localKafka/brokers.sh & "
 # --regex-Scala=/^[^\*\/]*var[ \\t]*([a-zA-Z0-9_]+)[ \\t]*[:=]/\1/v,variables/
 # --regex-Scala=/^[^\*\/]*type[ \\t]*([a-zA-Z0-9_]+)[ \\t]*[\[<>=]/\1/T,types/
 # --exclude='*/target/*'
-
-alias sctags="/usr/local/Cellar/ctags/5.8_1/bin/ctags -R -e"
 
 docker-stop() {
     echo "docker rm -f $(docker ps -aq)"
@@ -262,12 +263,15 @@ alias k="kubectl -n ck-service"
 alias kgp="kubectl -n ck-service get pods"
 alias kdp="kubectl -n ck-service describe pods"
 
+function get-pod(){
+    kubectl get pods -n ck-service | grep $1 | tr ' ' '\n' | head -n1
+}
 function kl(){
-    kubectl -n ck-service logs -f $1 ck-service
+    kubectl -n ck-service logs -f $(get-pod $1) ck-service
 }
 
 function katt(){
-    kubectl exec -it --namespace ck-service $1 -c ck-service bash
+    kubectl exec -it --namespace ck-service $(get-pod $1) -c ck-service bash
 }
 
 export NODE_IP=$(cat ~/.kube/config | grep server | cut -d / -f 3 | cut -d : -f 1)
