@@ -278,4 +278,10 @@ function katt(){
     kubectl exec -it --namespace ck-service $(get-pod $1) -c ck-service bash
 }
 
+function kpf(){
+    pod_name=$(get-pod $1)
+    shift
+    kubectl --namespace ck-service port-forward pod/$pod_name $@
+}
+
 export NODE_IP=$(cat ~/.kube/config | grep server | cut -d / -f 3 | cut -d : -f 1)
