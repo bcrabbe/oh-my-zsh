@@ -16,10 +16,14 @@ export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib"
 export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib"
 export EDITOR=vi
 export MANPATH=$MANPATH:"/usr/local/Cellar/erlang/22.0.1/lib/erlang/man/"
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="~/.local/bin:${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 #set zsh editing commands to emacs - see man zle
 bindkey -e
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
+autoload -U bashcompinit
+bashcompinit
+
+eval "$(register-python-argcomplete pipx)"
 
 consume-local () {
     ~/Software/kafka_2.11-1.1.0/bin/kafka-console-consumer.sh \
@@ -178,7 +182,7 @@ git-delete-tag() {
 #https://medium.com/@Clovis_app/configuration-of-a-beautiful-efficient-terminal-and-prompt-on-osx-in-7-minutes-827c29391961
 ZSH_THEME="powerlevel9k/powerlevel9k"
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir ssh vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator background_jobs history time)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()#(status root_indicator background_jobs history time)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=false
 
 # Add a space in the first prompt
@@ -198,7 +202,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 
 alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
 # fresh set up ?
-# add emacs style editing to iterm2 : https://apple.stackexchange.com/questions/154292/iterm-going-one-word-backwards-and-forwards?newreg=f43b9d3acf884899a01bb28b566b9b27
+# add emacs style editing to iterm2 by setting iterm2 > preferences > profiles > keys > left option to escape
 
 if command -v pyenv 1>/dev/null 2>&1; then
     eval "$(pyenv init -)"
