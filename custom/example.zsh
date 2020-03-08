@@ -284,4 +284,6 @@ function kpf(){
     kubectl --namespace ck-service port-forward pod/$pod_name $@
 }
 
-export NODE_IP=$(cat ~/.kube/config | grep server | cut -d / -f 3 | cut -d : -f 1)
+if [ -f ~/.kube/config ]; then
+    export NODE_IP=$(cat ~/.kube/config | grep server | cut -d / -f 3 | cut -d : -f 1)
+fi
